@@ -4,9 +4,13 @@ body
     text-align: center; 
 }
 
+hr {
+    width: 500px;
+}
+
 #board
 {
-    width: 500px;
+    width: 400px;
     height: 400px;
 
     background-color: #cdc1b5;
