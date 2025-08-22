@@ -18,12 +18,12 @@ function setGame(){
     //     [0, 0, 0, 0]
     // ]
 
-      board = [
-        [2, 16, 2048, 4096],
-        [4, 32, 1024, 2],
-        [6, 64, 512, 4],
-        [8, 128, 256, 16]
-    ]
+       board = [
+        [2, 2, 2, 2],
+        [2, 2, 2, 2],
+        [4, 4, 8, 8],
+        [4, 4, 8, 8]
+    ];
     //loop through every position in the grid
     for ( let r = 0; r < rows; r++){
         for (let c = 0; c < columns; c++){
