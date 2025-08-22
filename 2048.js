@@ -82,6 +82,11 @@ document.addEventListener("keyup", (e) => {
         //if left is pressed trigger slideleft();
         slideLeft();
     }
+     else if (e.code == "ArrowRight"){
+        //if right is pressed trigger slideright();
+        slideRight();
+    }
+    
 })
 
 
@@ -93,7 +98,7 @@ function filterZero(row)
 }
 
 
-function slide(){ 
+function slide(row){ 
 
     row = filterZero(row); //get rid of zeroes
 
@@ -111,7 +116,7 @@ function slide(){
     row = filterZero(row);
 
     //add zeroes
-    while(row.length < column){
+    while(row.length < columns){
         row.push(0);
     }
     return row;
@@ -128,7 +133,28 @@ function slideLeft() {
 
         for (let c = 0; c < columns; c++)
         {
-            let tile = document.getElementById
+            let tile = document.getElementById(r.toString() + "-" + c.toString());
+            let num = board[r][c];
+            updateTile(tile,num);
+
+        }
+    }
+}
+
+function slideRight() {
+    for (let r = 0; r < rows; r++){
+        let row = board [r];
+        row.reverse();
+        row = slide(row);
+        row.reverse();
+        board[r] =row;
+
+        for (let c = 0; c < columns; c++)
+        {
+            let tile = document.getElementById(r.toString() + "-" + c.toString());
+            let num = board[r][c];
+            updateTile(tile,num);
+
         }
     }
 }
