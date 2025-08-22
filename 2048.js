@@ -1,205 +1,187 @@
-let board = []; // holds the actual grid (4x4 matrix)
-let score = 0; // keeps track of total score
-const rows = 4; // number of rows in the grid
-const columns = 4; // number of columns in the grid
+let board = [];        // 2D array → holds the 4x4 grid numbers
+let score = 0;         // current score
+const rows = 4;        // number of rows in the board
+const columns = 4;     // number of columns in the board
 
-// game starts as soon as the window loads
-window.onload = function(){
+// start the game as soon as everything loads
+window.onload = function() {
     setGame();
 }
 
-function setGame(){
-    // initialise the board with all zeros (so basically it's empty)
+// ----------------------------------------------
+// SETUP + RESET
+// ----------------------------------------------
+function setGame() {
+    // clear out old board div (important on reset)
+    document.getElementById("board").innerHTML = "";
+
+    // reset score + HUD
+    score = 0;
+    updateScore();
+
+    // empty 4x4 array (all zeros means blank tiles)
     board = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
         [0, 0, 0, 0],
         [0, 0, 0, 0]
-    ]
+    ];
 
-    // debugging layout (for testing merges etc.)
-    // board = [
-    //     [2, 2, 2, 2],
-    //     [2, 2, 2, 2],
-    //     [4, 4, 8, 8],
-    //     [4, 4, 8, 8]
-    // ];
-
-    // loop through every single square in the grid
-    for ( let r = 0; r < rows; r++){
-        for (let c = 0; c < columns; c++){
-
-            // create an empty div for each square
+    // build the grid visually in DOM
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
             let tile = document.createElement("div");
-
-            // give each tile a unique id based on row and column → e.g. "2-3"
-            tile.id = r.toString() + "-" + c.toString();
-
-            // grab whatever number is at this spot in the board
-            let num = board[r][c];
-            
-            // style the tile based on that number (blank if 0, otherwise a value tile)
-            updateTile(tile, num);
-
-            // actually put this div into the "board" container in the HTML
+            tile.id = r + "-" + c; // unique id like "0-2"
+            updateTile(tile, board[r][c]);
             document.getElementById("board").append(tile);
         }
     }
 
-    // game should never start completely empty → add two starting "2"s
+    // every new game starts with 2 random "2" tiles
     setTwo();
     setTwo();
+
+    // sync HUD (score + moves + gameover banner)
+    syncHUD();
 }
 
-// handles how a tile should look based on its number
-function updateTile(tile, num){
-    tile.innerText = "";        // clear whatever was in the tile before
-    tile.classList.value = "";  // reset all old classes
-    tile.classList.add("tile"); // give it the basic "tile" styling
+// click → start fresh
+document.getElementById("resetBtn").addEventListener("click", () => {
+    document.getElementById("gameOver").style.display = "none";
+    setGame();
+});
 
-    // only bother showing something if num > 0
-    if (num > 0){
-        tile.innerText = num; // put the number inside the square
+// ----------------------------------------------
+// TILE HANDLING
+// ----------------------------------------------
+function updateTile(tile, num) {
+    tile.innerText = "";
+    tile.classList.value = "";
+    tile.classList.add("tile");
 
-        // use specific CSS classes for specific values (x2, x4, x8 etc.)
+    if (num > 0) {
+        tile.innerText = num;
         if (num <= 4096) {
-            tile.classList.add("x" + num.toString());
-        }
-        else {
-            // anything bigger than 4096 gets lumped into one style (x9182)
-            tile.classList.add("x9182");
+            tile.classList.add("x" + num);
+        } else {
+            tile.classList.add("x9182"); // all big bois same color
         }
     }
 }
 
-// listen for arrow key presses → move tiles accordingly
+// ----------------------------------------------
+// CONTROLS
+// ----------------------------------------------
 document.addEventListener("keyup", (e) => {
-    if (e.code == "ArrowLeft"){
-        slideLeft();
-    }
-    else if (e.code == "ArrowRight"){
-        slideRight();
-    }
-    else if (e.code == "ArrowUp"){
-        slideUp();
-    }
-    else if (e.code == "ArrowDown"){
-        slideDown();
-    }
-})
+    if (e.code === "ArrowLeft") slideLeft();
+    else if (e.code === "ArrowRight") slideRight();
+    else if (e.code === "ArrowUp") slideUp();
+    else if (e.code === "ArrowDown") slideDown();
+});
 
-// helper function: strip out zeros from a row
-// e.g. [2,0,2,4] → [2,2,4]
-function filterZero(row){
+// ----------------------------------------------
+// SLIDE LOGIC
+// ----------------------------------------------
+
+// removes zeros
+function filterZero(row) {
     return row.filter(num => num != 0);
 }
 
-// main sliding/merging logic for a single row
-function slide(row){ 
-    row = filterZero(row); // first get rid of all zeros
+// slide + merge a single row (to the left)
+function slide(row) {
+    row = filterZero(row);
 
-    // merge step → look at each number and the one next to it
-    for (let i = 0; i < row.length-1; i++){
-        if (row[i] == row[i+1]){   // if two same numbers touch
-            row[i] *= 2;           // double the first one
-            row[i + 1] = 0;        // wipe the second one
-            score += row[i];       // add that value to score
+    // merge step
+    for (let i = 0; i < row.length - 1; i++) {
+        if (row[i] === row[i + 1]) {
+            row[i] *= 2;
+            row[i + 1] = 0;
+            score += row[i];
         }
     }
 
-    // remove the "0" gaps created by merging
     row = filterZero(row);
 
-    // fill the rest with zeros so row always has 4 items
-    while(row.length < columns){
+    // pad with zeros back to length 4
+    while (row.length < columns) {
         row.push(0);
     }
     return row;
 }
 
-// slide everything left
+// slide entire board left
 function slideLeft() {
-    for (let r = 0; r < rows; r++){
-        let row = board[r];
-        row = slide(row); // merge + shift left
+    for (let r = 0; r < rows; r++) {
+        let row = slide(board[r]);
         board[r] = row;
-
-        // update every tile on that row visually
-        for (let c = 0; c < columns; c++){
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile,num);
+        for (let c = 0; c < columns; c++) {
+            updateTile(document.getElementById(r + "-" + c), board[r][c]);
         }
     }
-    setTwo();       // spawn new tile
-    updateScore();  // refresh score display
+    afterMove();
 }
 
-// slide everything right (just reverse, slide left, reverse back)
+// slide right
 function slideRight() {
-    for (let r = 0; r < rows; r++){
-        let row = board[r];
-        row.reverse();
+    for (let r = 0; r < rows; r++) {
+        let row = board[r].slice().reverse();
         row = slide(row);
         row.reverse();
         board[r] = row;
-
-        for (let c = 0; c < columns; c++){
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile,num);
+        for (let c = 0; c < columns; c++) {
+            updateTile(document.getElementById(r + "-" + c), board[r][c]);
         }
     }
-    setTwo();
-    updateScore();
+    afterMove();
 }
 
-// slide everything up → treat each column like a "row"
+// slide up
 function slideUp() {
     for (let c = 0; c < columns; c++) {
-        let row = [board[0][c], board[1][c], board[2][c], board[3][c]];
-        row = slide(row);
-        for (let r = 0; r < rows; r++){
-            board[r][c] = row[r]; // update board with new values
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
+        let col = [board[0][c], board[1][c], board[2][c], board[3][c]];
+        col = slide(col);
+        for (let r = 0; r < rows; r++) {
+            board[r][c] = col[r];
+            updateTile(document.getElementById(r + "-" + c), board[r][c]);
         }
     }
-    setTwo();
-    updateScore();
+    afterMove();
 }
 
-// slide everything down → reverse column, slide, reverse back
+// slide down
 function slideDown() {
     for (let c = 0; c < columns; c++) {
-        let row = [board[0][c], board[1][c], board[2][c], board[3][c]];
-        row.reverse();
-        row = slide(row);
-        row.reverse();
-        for (let r = 0; r < rows; r++){
-            board[r][c] = row[r];
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
+        let col = [board[0][c], board[1][c], board[2][c], board[3][c]].reverse();
+        col = slide(col);
+        col.reverse();
+        for (let r = 0; r < rows; r++) {
+            board[r][c] = col[r];
+            updateTile(document.getElementById(r + "-" + c), board[r][c]);
         }
     }
-    setTwo();
-    updateScore();
+    afterMove();
 }
 
-// randomly place a "2" tile somewhere empty on the board
+// what happens after every move
+function afterMove() {
+    setTwo();       // drop a new random "2"
+    syncHUD();      // update score, moves, and game over state
+}
+
+// ----------------------------------------------
+// RANDOM TILE
+// ----------------------------------------------
 function setTwo() {
-    if (!hasEmptyTile()) {
-        return; // do nothing if the board is full
-    }
+    if (!hasEmptyTile()) return;
+
     let found = false;
     while (!found) {
         let r = Math.floor(Math.random() * rows);
         let c = Math.floor(Math.random() * columns);
-        if (board[r][c] == 0) { // found an empty spot
+        if (board[r][c] === 0) {
             board[r][c] = 2;
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
+            let tile = document.getElementById(r + "-" + c);
             tile.innerText = "2";
             tile.classList.add("x2");
             found = true;
@@ -207,19 +189,77 @@ function setTwo() {
     }
 }
 
-// checks if at least one tile is empty (used before spawning new ones)
 function hasEmptyTile() {
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < columns; c++) {
-            if (board[r][c] == 0) {
-                return true;
-            }
+            if (board[r][c] === 0) return true;
         }
     }
     return false;
 }
 
-// update the "Score: X" text in the HTML
+// ----------------------------------------------
+// HUD: SCORE, MOVES, GAME OVER
+// ----------------------------------------------
 function updateScore() {
-    document.getElementById("score").innerText = "Score: " + score;
+    document.getElementById("score").innerText = score;
+}
+
+// check if you can move in each direction
+function canMoveLeft(b = board) {
+    for (let r = 0; r < rows; r++) {
+        for (let c = 1; c < columns; c++) {
+            if (b[r][c] === 0) continue;
+            if (b[r][c - 1] === 0 || b[r][c - 1] === b[r][c]) return true;
+        }
+    }
+    return false;
+}
+function canMoveRight(b = board) {
+    for (let r = 0; r < rows; r++) {
+        for (let c = columns - 2; c >= 0; c--) {
+            if (b[r][c] === 0) continue;
+            if (b[r][c + 1] === 0 || b[r][c + 1] === b[r][c]) return true;
+        }
+    }
+    return false;
+}
+function canMoveUp(b = board) {
+    for (let c = 0; c < columns; c++) {
+        for (let r = 1; r < rows; r++) {
+            if (b[r][c] === 0) continue;
+            if (b[r - 1][c] === 0 || b[r - 1][c] === b[r][c]) return true;
+        }
+    }
+    return false;
+}
+function canMoveDown(b = board) {
+    for (let c = 0; c < columns; c++) {
+        for (let r = rows - 2; r >= 0; r--) {
+            if (b[r][c] === 0) continue;
+            if (b[r + 1][c] === 0 || b[r + 1][c] === b[r][c]) return true;
+        }
+    }
+    return false;
+}
+
+// count directions (0–4) instead of “empty tiles”
+function countPossibleMoves() {
+    let cnt = 0;
+    if (canMoveLeft()) cnt++;
+    if (canMoveRight()) cnt++;
+    if (canMoveUp()) cnt++;
+    if (canMoveDown()) cnt++;
+    return cnt;
+}
+
+// refresh the bottom HUD
+function syncHUD() {
+    updateScore();
+    let moves = countPossibleMoves();
+    document.getElementById("moves").innerText = moves;
+
+    // game over banner toggle
+    const go = document.getElementById("gameOver");
+    if (go) go.style.display = (moves === 0) ? "block" : "none";
 }
