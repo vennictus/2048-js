@@ -1,43 +1,45 @@
-/* Import retro pixel font */
+/* Load retro pixel font (arcade vibes) */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
     font-family: 'Press Start 2P', cursive;
     text-align: center;
-    background-color: #121212; /* dark arcade bg */
+    background-color: #121212; /* dark arcade background */
     color: #f5f5f5;
     border-radius: 10;
 }
 
 .outerBox {
-    border: 4px solid #3a3a3a;   /* 🕹 Retro dark border */
-    border-radius: 10px;         /* rounded corners */
-    padding: 20px;               /* space inside the box */
-    width: fit-content;          /* box fits content size */
-    margin: 20px auto;           /* center horizontally */
-    background-color: #111;      /* retro arcade black */
-    color: rgb(255, 255, 0);;                 /* green arcade text */
-    box-shadow: 0px 0px 20px rgb(255, 255, 0); /* glowing retro effect */
+    border: 4px solid #3a3a3a;   /* solid retro frame */
+    border-radius: 10px;         /* rounded box edges */
+    padding: 20px;               /* breathing room inside */
+    width: fit-content;          /* shrink-wrap to content */
+    margin: 20px auto;           /* center on screen */
+    background-color: #111;      /* deep arcade black */
+    color: rgb(255, 255, 0);     /* yellow arcade text */
+    box-shadow: 0px 0px 20px rgb(255, 255, 0); /* glowing border effect */
 }
 
 
-/* Make score/title retro */
+/* Retro golden headers */
 h1, h2 {
-    color: #ffcc00; /* golden retro text */
+    color: #ffcc00;
     text-shadow: 0 0 5px #ffcc00, 0 0 10px #ff8800;
 }
 
+/* divider line */
 hr {
     width: 500px;
-    border: 2px solid #444; /* more retro divider */
+    border: 2px solid #444; /* faint retro line */
 }
 
+/* game board area */
 #board {
     width: 400px;
     height: 400px;
     margin: 20px auto;
 
-    background-color: #1c1c1c; /* darker retro grid bg */
+    background-color: #1c1c1c; /* dark playfield */
     border: 8px solid #444;
     border-radius: 12px;
 
@@ -45,15 +47,16 @@ hr {
     justify-items: center;
     display: flex;
     flex-wrap: wrap;
-    box-shadow: 0 0 20px #ffcc00; /* glowing arcade frame */
+    box-shadow: 0 0 20px #ffcc00; /* glowing border */
 }
 
+/* individual tiles */
 .tile {
     width: 90px;
     height: 90px;
-    border: 2px solid #333; /* sharper retro grid lines */
+    border: 2px solid #333; /* visible grid lines */
 
-    font-size: 18px; /* retro font is small, so lower size */
+    font-size: 18px; /* retro font needs smaller size */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,11 +64,11 @@ hr {
     margin-top: auto;
     margin-bottom: auto;
 
-    /* pixel look */
+    /* crisp pixel rendering */
     image-rendering: pixelated;
 }
 
-/* --- Retro Tile Colors --- */
+/* tile colors by value */
 .x2 { background-color: #ccc0b3; color: #222; }
 .x4 { background-color: #aaa08d; color: #fff; }
 .x8 { background-color: #f59563; }
@@ -81,42 +84,47 @@ hr {
 .x8192 { background-color: #ff2222; }
 
 
+/* reset button: glowing red arcade style */
 #resetBtn {
-    width: 120px;               /* 🎛 button width */
-    height: 50px;               /* 🎛 button height */
-    background-color: #222;     /* 🕹 retro dark base */
-    color: #f00;                /* 🔴 bright red text */
-    font-size: 18px;            /* ✍ readable text */
-    border: 2px solid #f00;     /* 🔴 red border */
-    border-radius: 8px;         /* smooth corners */
-    cursor: pointer;            /* pointer on hover */
-    font-family: monospace;     /* retro arcade font vibe */
-    box-shadow: 0px 0px 8px #f00; /* 🔥 glowing retro effect */
-    transition: 0.2s ease;      /* smooth hover */
+    width: 120px;               
+    height: 50px;               
+    background-color: #222;     /* dark button base */
+    color: #f00;                /* red text */
+    font-size: 18px;            
+    border: 2px solid #f00;     /* red outline */
+    border-radius: 8px;         
+    cursor: pointer;            
+    font-family: monospace;     /* arcade-y look */
+    box-shadow: 0px 0px 8px #f00; /* glowing red */
+    transition: 0.2s ease;      
 }
 
+/* button hover = red glow */
 #resetBtn:hover {
-    background-color: #f00;     /* 🔴 red fill */
-    color: #000;                /* ⚫ black text */
-    box-shadow: 0px 0px 15px #f00; /* extra glow */
-}
-.outerBox {
-    display: inline-block;       /* keep size only as big as content */
-    padding: 20px;
-    border: 4px solid pink;
-    border-radius: 10px;
-    position: relative;          /* so child absolute positions work */
+    background-color: #f00;     
+    color: #000;                
+    box-shadow: 0px 0px 15px #f00;
 }
 
+/* container adjustments + prep for overlay */
+.outerBox {
+    display: inline-block;      
+    padding: 20px;
+    border: 4px solid pink;     /* debug border (currently pink) */
+    border-radius: 10px;
+    position: relative;         /* lets #gameOver sit on top */
+}
+
+/* game over message overlay */
 #gameOver {
-    position: absolute;          /* sits on top of .outerBox */
-    top: 50%;                    /* center vertically */
-    left: 50%;                   /* center horizontally */
+    position: absolute;         
+    top: 50%;                   
+    left: 50%;                  
     transform: translate(-50%, -50%);
     color: red;
     font-size: 30px;
     font-weight: bold;
-    background: rgba(255, 255, 255, 0.8); /* translucent background */
+    background: rgba(255, 255, 255, 0.8); /* semi-transparent box */
     padding: 10px 20px;
     border-radius: 8px;
 }

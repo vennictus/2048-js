@@ -1,25 +1,25 @@
-let board = [];        // 2D array → holds the 4x4 grid numbers
+let board = [];        // main grid: 4x4 array of numbers
 let score = 0;         // current score
-const rows = 4;        // number of rows in the board
-const columns = 4;     // number of columns in the board
+const rows = 4;        // grid rows
+const columns = 4;     // grid cols
 
-// start the game as soon as everything loads
+// boot game on page load
 window.onload = function() {
     setGame();
 }
 
 // ----------------------------------------------
-// SETUP + RESET
+// GAME SETUP + RESET
 // ----------------------------------------------
 function setGame() {
-    // clear out old board div (important on reset)
+    // clear old board (needed on reset)
     document.getElementById("board").innerHTML = "";
 
     // reset score + HUD
     score = 0;
     updateScore();
 
-    // empty 4x4 array (all zeros means blank tiles)
+    // start with empty 4x4
     board = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],
@@ -27,32 +27,32 @@ function setGame() {
         [0, 0, 0, 0]
     ];
 
-    // build the grid visually in DOM
+    // build grid DOM
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < columns; c++) {
             let tile = document.createElement("div");
-            tile.id = r + "-" + c; // unique id like "0-2"
+            tile.id = r + "-" + c; // like "0-2"
             updateTile(tile, board[r][c]);
             document.getElementById("board").append(tile);
         }
     }
 
-    // every new game starts with 2 random "2" tiles
+    // drop two starter 2’s
     setTwo();
     setTwo();
 
-    // sync HUD (score + moves + gameover banner)
+    // HUD update
     syncHUD();
 }
 
-// click → start fresh
+// reset button click
 document.getElementById("resetBtn").addEventListener("click", () => {
     document.getElementById("gameOver").style.display = "none";
     setGame();
 });
 
 // ----------------------------------------------
-// TILE HANDLING
+// TILE UPDATER
 // ----------------------------------------------
 function updateTile(tile, num) {
     tile.innerText = "";
@@ -64,7 +64,7 @@ function updateTile(tile, num) {
         if (num <= 4096) {
             tile.classList.add("x" + num);
         } else {
-            tile.classList.add("x9182"); // all big bois same color
+            tile.classList.add("x9182"); // big boys same skin
         }
     }
 }
@@ -80,15 +80,15 @@ document.addEventListener("keyup", (e) => {
 });
 
 // ----------------------------------------------
-// SLIDE LOGIC
+// SLIDE / MERGE LOGIC
 // ----------------------------------------------
 
-// removes zeros
+// strip out zeros
 function filterZero(row) {
     return row.filter(num => num != 0);
 }
 
-// slide + merge a single row (to the left)
+// slide + merge one row left
 function slide(row) {
     row = filterZero(row);
 
@@ -103,14 +103,14 @@ function slide(row) {
 
     row = filterZero(row);
 
-    // pad with zeros back to length 4
+    // pad back with zeros
     while (row.length < columns) {
         row.push(0);
     }
     return row;
 }
 
-// slide entire board left
+// move whole board left
 function slideLeft() {
     for (let r = 0; r < rows; r++) {
         let row = slide(board[r]);
@@ -122,7 +122,7 @@ function slideLeft() {
     afterMove();
 }
 
-// slide right
+// move right
 function slideRight() {
     for (let r = 0; r < rows; r++) {
         let row = board[r].slice().reverse();
@@ -136,7 +136,7 @@ function slideRight() {
     afterMove();
 }
 
-// slide up
+// move up
 function slideUp() {
     for (let c = 0; c < columns; c++) {
         let col = [board[0][c], board[1][c], board[2][c], board[3][c]];
@@ -149,7 +149,7 @@ function slideUp() {
     afterMove();
 }
 
-// slide down
+// move down
 function slideDown() {
     for (let c = 0; c < columns; c++) {
         let col = [board[0][c], board[1][c], board[2][c], board[3][c]].reverse();
@@ -163,14 +163,14 @@ function slideDown() {
     afterMove();
 }
 
-// what happens after every move
+// post-move actions
 function afterMove() {
-    setTwo();       // drop a new random "2"
-    syncHUD();      // update score, moves, and game over state
+    setTwo();       // add new 2
+    syncHUD();      // refresh HUD
 }
 
 // ----------------------------------------------
-// RANDOM TILE
+// RANDOM TILE SPAWNER
 // ----------------------------------------------
 function setTwo() {
     if (!hasEmptyTile()) return;
@@ -189,6 +189,7 @@ function setTwo() {
     }
 }
 
+// check for blanks
 function hasEmptyTile() {
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < columns; c++) {
@@ -199,13 +200,13 @@ function hasEmptyTile() {
 }
 
 // ----------------------------------------------
-// HUD: SCORE, MOVES, GAME OVER
+// HUD: SCORE + MOVES + GAME OVER
 // ----------------------------------------------
 function updateScore() {
     document.getElementById("score").innerText = score;
 }
 
-// check if you can move in each direction
+// can you move left?
 function canMoveLeft(b = board) {
     for (let r = 0; r < rows; r++) {
         for (let c = 1; c < columns; c++) {
@@ -215,6 +216,8 @@ function canMoveLeft(b = board) {
     }
     return false;
 }
+
+// can you move right?
 function canMoveRight(b = board) {
     for (let r = 0; r < rows; r++) {
         for (let c = columns - 2; c >= 0; c--) {
@@ -224,6 +227,8 @@ function canMoveRight(b = board) {
     }
     return false;
 }
+
+// can you move up?
 function canMoveUp(b = board) {
     for (let c = 0; c < columns; c++) {
         for (let r = 1; r < rows; r++) {
@@ -233,6 +238,8 @@ function canMoveUp(b = board) {
     }
     return false;
 }
+
+// can you move down?
 function canMoveDown(b = board) {
     for (let c = 0; c < columns; c++) {
         for (let r = rows - 2; r >= 0; r--) {
@@ -243,7 +250,7 @@ function canMoveDown(b = board) {
     return false;
 }
 
-// count directions (0–4) instead of “empty tiles”
+// count how many directions are open
 function countPossibleMoves() {
     let cnt = 0;
     if (canMoveLeft()) cnt++;
@@ -253,13 +260,13 @@ function countPossibleMoves() {
     return cnt;
 }
 
-// refresh the bottom HUD
+// HUD refresh
 function syncHUD() {
     updateScore();
     let moves = countPossibleMoves();
     document.getElementById("moves").innerText = moves;
 
-    // game over banner toggle
+    // show/hide GAME OVER
     const go = document.getElementById("gameOver");
     if (go) go.style.display = (moves === 0) ? "block" : "none";
 }
