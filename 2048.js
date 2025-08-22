@@ -149,6 +149,8 @@ function slideLeft() {
         }
     }
     setTwo();
+    updateScore();
+
 
 }
 
@@ -169,6 +171,7 @@ function slideRight() {
         }
     }
     setTwo();
+    updateScore();
 
 }
 
@@ -189,6 +192,8 @@ function slideUp() {
         }
     }
     setTwo();
+    updateScore();
+
 
 }
 
@@ -210,6 +215,8 @@ function slideDown() {
         }
     }
     setTwo();
+    updateScore();
+
 
 }
 
@@ -242,4 +249,7 @@ function hasEmptyTile() {
         }
     }
     return false;
+}
+function updateScore() {
+    document.getElementById("score").innerText = "Score: " + score;
 }
